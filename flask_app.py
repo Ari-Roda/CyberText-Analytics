@@ -6,11 +6,11 @@ import dash_core_components as dcc
 import dash_html_components as html#
 import plotly.express as px
 import pandas as pd
-from data_retrieval import get_mostfrequent_data_all, get_dataframe, get_mostfrequent_data_all_daterange, get_cleaned_text_data_original
+from data_retrieval_connect_pythonanywhere_ssh import get_mostfrequent_data_all, get_mostfrequent_data_all_daterange, get_cleaned_text_data_original, get_novice_view_data, static_df #get_dataframe, 
 from dash.dependencies import Input, Output
 import dash_table
 import plotly.graph_objs as go
-from datetime import datetime
+import datetime
 from contractions import world_abbreviations
 
 server = Flask(__name__)
@@ -19,17 +19,35 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, server=server, routes_pathname_prefix='/',
                 external_stylesheets=external_stylesheets)
 
-df = get_dataframe()
-df_data = get_mostfrequent_data_all_daterange("ALL",df['sql_datetime_object'].min(),df['sql_datetime_object'].max())
-most_frequent_words = df_data[0][:30]
-most_frequent_words_values = df_data[1][:30]
+#df = get_dataframe()
+#df = static_df
+#df_data = get_mostfrequent_data_all_daterange("ALL",df['sql_datetime_object'].min(),df['sql_datetime_object'].max())
+#most_frequent_words = df_data[0][:30]
+#most_frequent_words_values = df_data[1][:30]
+#df1.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object ':'datetime'}, inplace=True)
 
-df.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object ':'datetime'}, inplace=True)
+df_tweet = pd.DataFrame(columns=['text', 'platform', 'sentiment','datetime'])
+#df.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object ':'datetime'}, inplace=True)
+fig = go.Figure([go.Bar(x=[], y=[],orientation='h',name='value1')])
+#fig = go.Figure([go.Bar(x=most_frequent_words_values[::-1], y=most_frequent_words[::-1],orientation='h',name='value1')])
 
-fig = go.Figure([go.Bar(x=most_frequent_words_values[::-1], y=most_frequent_words[::-1],orientation='h',name='value1')])
+
 fig.update_layout(title="TFIDF N-gram Ranking",height=680,margin=dict(l=160,r=0,b=15,t=40,pad=0),font=dict(color="black"))
 
-APTZ = pd.read_csv('/home/dmnte/mysite/APTDB.csv',encoding="latin-1")
+novice_graph = go.Figure()
+novice_df = get_novice_view_data()
+novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['spyware'], name='spyware'))
+novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['malware'], name='malware'))
+novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['trojan'], name='trojan'))
+novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['ransomware'], name='ransomware'))
+novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['phishing'], name='phishing'))
+novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['scam'], name='scam'))
+novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['password'], name='password'))
+novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['botnet'], name='botnet'))
+novice_graph.update_layout(title_text='Day Tracker', xaxis=dict(tickmode='linear'))
+
+
+APTZ = pd.read_csv('APTDB.csv',encoding="latin-1")
 abrevs = ["VAT"]
 
 tabs_styles = {
@@ -49,13 +67,27 @@ tab_selected_style = {
 }
 
 
+
 app.layout = html.Div([
   html.H1("CyberText Analytics",style={'textAlign': 'left',"background": "silver","color": "blue"}),
 
+
+########################################################################################################################################################################
+################### CTA TAB ##########################################################################################################################################
+#########################################################################################################################################################################
+
+
   dcc.Tabs([
     dcc.Tab(label='Cyber Tweet Tracker', style=tab_style, selected_style=tab_selected_style, children=[
-
     html.Div([
+
+
+      
+      html.Div([
+      
+      html.Div(dcc.Graph(id='graph-output-simple', figure=novice_graph), className="thirteen columns"),], className="row"),
+      #html.Div(dcc.Graph(id='graph-output', figure=fig, className="six columns",config={'displayModeBar': False})),
+
 
         html.Div([
       html.Div(dcc.Dropdown(id='dropdown',
@@ -77,38 +109,38 @@ app.layout = html.Div([
                        id='date-input',
                        #min_date_allowed=df['sql_datetime_object'].min(),
                        #max_date_allowed=df['sql_datetime_object'].max(),
-                       initial_visible_month=datetime.now(),
-                       start_date=df['sql_datetime_object'].min(),
-                       end_date=df['sql_datetime_object'].max(),
+                       initial_visible_month=datetime.datetime.now(),
+                       start_date=datetime.datetime.today() - datetime.timedelta(1),
+                       end_date=datetime.datetime.today(),
                        month_format='YYYY,MMMM',
                        display_format='YYYY-MM-DD',
                        style={
                                'margin' : 7,
                                'margin-left' : '45px',
                        }
-
               ), className="three columns"),
               ], className="row"),
 
 
 
-
-
-        html.Div(dcc.Graph(id='graph-output', figure=fig, className="six columns",config={'displayModeBar': False})),
-
-        html.Div(dash_table.DataTable(id='tweet-dataframe',
-                                    columns=[{"name": i, "id": i} for i in df.columns],
-                                    data=df.to_dict('records'),
-                                    style_table={'height':'71vh','width':'auto','overflowY': 'auto' }), className="six columns")
-
+        html.Div(dcc.Graph(id='graph-output', figure=fig, className="six columns",config={'displayModeBar': False})), #TFIDF bar Graph Output
+        html.Div(dash_table.DataTable(id='tweet-dataframe',                                                            #Tweet Dataframe
+                                      columns=[{"name": i, "id": i} for i in df_tweet.columns],
+                                      data=df_tweet.to_dict('records'),
+                                      style_table={'height':'71vh','width':'auto','overflowY': 'auto' }), className="six columns")
+             
              ], className="row"),
 
 
         html.Div(children=[dcc.Markdown(
-                   " © 2020 [CTA](https://github.com/ishikawa-rei)  All Rights Reserved.")], style={'marginLeft': 5, 'marginRight': 5, 'marginTop': 0, 'marginBottom': 10,
+                   " 2020 [CTA](https://github.com/ishikawa-rei)  All Rights Reserved.")], style={'marginLeft': 5, 'marginRight': 5, 'marginTop': 0, 'marginBottom': 10,
                'backgroundColor':'#F7FBFE',
                'border': 'thin lightgrey dashed', 'padding': '6px 0px 0px 8px'}),
 
+
+########################################################################################################################################################################
+################### APT DB TAB ##########################################################################################################################################
+#########################################################################################################################################################################
 
         ]),
         dcc.Tab(label='APT DB', style=tab_style, selected_style=tab_selected_style, children=[
@@ -1073,7 +1105,7 @@ app.layout = html.Div([
                  ]),
 
         html.Div(children=[dcc.Markdown(
-                   " © 2020 [CTA](https://github.com/ishikawa-rei)  All Rights Reserved.")], style={'marginLeft': 5, 'marginRight': 5, 'marginTop': 10, 'marginBottom': 10,
+                   "  2020 [CTA](https://github.com/ishikawa-rei)  All Rights Reserved.")], style={'marginLeft': 5, 'marginRight': 5, 'marginTop': 10, 'marginBottom': 10,
                'backgroundColor':'#F7FBFE',
                'border': 'thin lightgrey dashed', 'padding': '6px 0px 0px 8px'}),
 
@@ -1082,6 +1114,42 @@ app.layout = html.Div([
 
 ])
 
+# TFIDF bar graph function for filtering
+@app.callback(Output('graph-output', 'figure'),
+              [Input('dropdown', 'value'),
+               Input('date-input', 'start_date'),
+               Input('date-input', 'end_date')])
+def render_graph(ngram,start_date,end_date):
+
+  df_data = get_mostfrequent_data_all_daterange(ngram,start_date,end_date)
+
+  most_frequent_words_values = df_data[1][:30]
+  most_frequent_words = df_data[0][:30]
+
+  fig = go.Figure([go.Bar(x=most_frequent_words_values[::-1], y=most_frequent_words[::-1],orientation='h',name='value1')])
+  fig.update_layout(title="TFIDF N-gram Ranking",height=680,margin=dict(l=160,r=0,b=15,t=40,pad=0),font=dict(color="black"))
+
+  return (fig)
+
+
+# Tweet data filtering by clicking on TFIDF bar graph
+@app.callback(
+    Output('tweet-dataframe', 'data'),        # the output goes to
+    [Input('graph-output', 'clickData')])     # the input to the datatable upload container data variable is the clickdata from basic-interactions graph
+def display_click_data(clickData):
+# clickData is the term label taken when you click on the bargraph bar###
+    if clickData != None: # on first load no click
+        label = str(clickData['points'][0]['label'])
+    else:
+        label = "security"
+
+    
+    df1 = get_cleaned_text_data_original(label)
+    df1.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object ':'datetime'}, inplace=True)
+    return df1.to_dict('rows')
+
+
+
 @app.callback(
     Output('apt-table', 'data'),
     [Input('dropdown-countries', 'value'),
@@ -1089,7 +1157,7 @@ app.layout = html.Div([
      Input('dropdown-location', 'value'),
      Input('dropdown-tools', 'value')])
 def filter_apt_map(country,sector,origin,tool):
-  APTZ = pd.read_csv('/home/dmnte/mysite/APTDB.csv',encoding="latin-1")
+  APTZ = pd.read_csv('APTDB.csv',encoding="latin-1")
 
   origin = origin.upper()
 
@@ -1136,7 +1204,7 @@ def filter_apt_map(country,sector,origin,tool):
               Input('dropdown-location', 'value'),
               Input('dropdown-tools', 'value')])
 def update_map(selected,country,sector,origin,tool):
-  APTZ = pd.read_csv('/home/dmnte/mysite/APTDB.csv',encoding="latin-1")
+  APTZ = pd.read_csv('APTDB.csv',encoding="latin-1")
   origin = origin.upper()
 
   if country == 'A' and sector == 'A' and origin == 'A' and tool == 'A':
@@ -1190,41 +1258,6 @@ def update_map(selected,country,sector,origin,tool):
   fig.update_layout(margin={"r":0,"t":0,"l":0,"b":5}, showlegend=False)
 
   return (fig)
-
-
-@app.callback(Output('graph-output', 'figure'),
-              [Input('dropdown', 'value'),
-               Input('date-input', 'start_date'),
-               Input('date-input', 'end_date')])
-def render_graph(ngram,start_date,end_date):
-
-  df_data = get_mostfrequent_data_all_daterange(ngram,start_date,end_date)
-
-  most_frequent_words_values = df_data[1][:30]
-  most_frequent_words = df_data[0][:30]
-
-  fig = go.Figure([go.Bar(x=most_frequent_words_values[::-1], y=most_frequent_words[::-1],orientation='h',name='value1')])
-  fig.update_layout(title="TFIDF N-gram Ranking",height=680,margin=dict(l=160,r=0,b=15,t=40,pad=0),font=dict(color="black"))
-
-  return (fig)
-
-
-
-@app.callback(
-    Output('tweet-dataframe', 'data'),               # the output goes to
-    [Input('graph-output', 'clickData')])     # the input to the datatable upload container data variable is the clickdata from basic-interactions graph
-def display_click_data(clickData):
-# clickData is the term label taken when you click on the bargraph bar###
-    if clickData != None: # on first load no click
-        label = str(clickData['points'][0]['label'])
-    else:
-        label = "security"
-
-    dataf = get_cleaned_text_data_original()
-    df1 = dataf[dataf['ptext'].str.contains(label)]
-    df1.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object ':'datetime'}, inplace=True)
-
-    return df1.to_dict('rows')
 
 
 if __name__ == '__main__':
