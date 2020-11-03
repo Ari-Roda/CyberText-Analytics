@@ -3,7 +3,6 @@ from collections import Counter
 from nltk.stem import WordNetLemmatizer
 from contractions import CONTRACTION_MAP
 import nltk
-#from sqlalchemy import create_engine
 import creds
 import mysql.connector
 import sshtunnel

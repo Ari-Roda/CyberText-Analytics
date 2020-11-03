@@ -19,12 +19,12 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, server=server, routes_pathname_prefix='/',
                 external_stylesheets=external_stylesheets)
 
-#df = get_dataframe()
-#df = static_df
-#df_data = get_mostfrequent_data_all_daterange("ALL",df['sql_datetime_object'].min(),df['sql_datetime_object'].max())
-#most_frequent_words = df_data[0][:30]
-#most_frequent_words_values = df_data[1][:30]
-#df1.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object ':'datetime'}, inplace=True)
+##df = get_dataframe()
+##df = static_df
+##df_data = get_mostfrequent_data_all_daterange("ALL",df['sql_datetime_object'].min(),df['sql_datetime_object'].max())
+##most_frequent_words = df_data[0][:30]
+##most_frequent_words_values = df_data[1][:30]
+##df1.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object ':'datetime'}, inplace=True)
 
 df_tweet = pd.DataFrame(columns=['text', 'platform', 'sentiment','datetime'])
 #df.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object ':'datetime'}, inplace=True)
