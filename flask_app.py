@@ -19,6 +19,38 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, server=server, routes_pathname_prefix='/',
                 external_stylesheets=external_stylesheets)
 
+@server.route("/about")
+def about():
+    return "All about Flask"
+
+
+app.layout = html.Div(
+    [
+        html.H1("File Browser"),
+        html.H2("Upload"),
+        dcc.Upload(
+            id="upload-data",
+            children=html.Div(
+                ["Drag and drop or click to select a file to upload."]
+            ),
+            style={
+                "width": "100%",
+                "height": "60px",
+                "lineHeight": "60px",
+                "borderWidth": "1px",
+                "borderStyle": "dashed",
+                "borderRadius": "5px",
+                "textAlign": "center",
+                "margin": "10px",
+            },
+            multiple=True,
+        ),
+        html.H2("File List"),
+        html.Ul(id="file-list"),
+    ],
+    style={"max-width": "500px"},
+)
+
 ##df = get_dataframe()
 ##df = static_df
 ##df_data = get_mostfrequent_data_all_daterange("ALL",df['sql_datetime_object'].min(),df['sql_datetime_object'].max())
@@ -32,7 +64,8 @@ fig = go.Figure([go.Bar(x=[], y=[],orientation='h',name='value1')])
 #fig = go.Figure([go.Bar(x=most_frequent_words_values[::-1], y=most_frequent_words[::-1],orientation='h',name='value1')])
 
 
-fig.update_layout(title="TFIDF N-gram Ranking",height=680,margin=dict(l=160,r=0,b=15,t=40,pad=0),font=dict(color="black"))
+fig.update_layout(title="Threat Term Ranking",height=680,margin=dict(l=160,r=0,b=15,t=40,pad=0),font=dict(color="black"))
+
 
 novice_graph = go.Figure()
 novice_df = get_novice_view_data()
@@ -44,7 +77,10 @@ novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['phishing'], na
 novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['scam'], name='scam'))
 novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['password'], name='password'))
 novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['botnet'], name='botnet'))
-novice_graph.update_layout(title_text='Day Tracker', xaxis=dict(tickmode='linear'))
+novice_graph.update_layout(title_text='<b>Daily Threat Term Presence</b>',font_size=13,font_family="Courier New", xaxis=dict(tickmode='linear'))
+
+
+#dcc.Graph(id='apt-map',figure = go.Figure(go.Choropleth(locations=abrevs)),config={'displayModeBar': False})
 
 
 APTZ = pd.read_csv('APTDB.csv',encoding="latin-1")
@@ -78,16 +114,14 @@ app.layout = html.Div([
 
 
   dcc.Tabs([
-    dcc.Tab(label='Cyber Tweet Tracker', style=tab_style, selected_style=tab_selected_style, children=[
+    dcc.Tab(label='Threat Text Tracking', style=tab_style, selected_style=tab_selected_style, children=[
     html.Div([
 
 
       
       html.Div([
       
-      html.Div(dcc.Graph(id='graph-output-simple', figure=novice_graph), className="thirteen columns"),], className="row"),
-      #html.Div(dcc.Graph(id='graph-output', figure=fig, className="six columns",config={'displayModeBar': False})),
-
+      html.Div(dcc.Graph(id='graph-output-simple', figure=novice_graph, config={'displayModeBar': False}), className="thirteen columns"),], className="row"),
 
         html.Div([
       html.Div(dcc.Dropdown(id='dropdown',
@@ -102,9 +136,10 @@ app.layout = html.Div([
                                     ],
                             style={
                                    'margin': 7,
+                                   'marginLeft':76,
                                    'width': '150px',
                                   }
-                            ), className="one columns"),
+                            ), className="two columns"),
       html.Div(dcc.DatePickerRange(
                        id='date-input',
                        #min_date_allowed=df['sql_datetime_object'].min(),
@@ -119,6 +154,15 @@ app.layout = html.Div([
                                'margin-left' : '45px',
                        }
               ), className="three columns"),
+              ], className="row"),
+
+
+
+      html.Div([
+        html.Div(dcc.Markdown("**Threat Term Ranking**"), style={'marginLeft': 158, 'marginRight': 0, 'marginTop': 0, 'marginBottom': 25,
+               'padding': '0px 0px 0px 0px',"font-family":"Courier New",'font-size':'18px'}, className="five columns"),
+        html.Div(dcc.Markdown("**Threat Tweet Data Viewer**"), style={'marginLeft': 50, 'marginRight': 0, 'marginTop': 0, 'marginBottom': 25,
+               'padding': '0px 0px 0px 0px',"font-family":"Courier New",'font-size':'18px'}, className="six columns"),
               ], className="row"),
 
 
@@ -1127,8 +1171,8 @@ def render_graph(ngram,start_date,end_date):
   most_frequent_words = df_data[0][:30]
 
   fig = go.Figure([go.Bar(x=most_frequent_words_values[::-1], y=most_frequent_words[::-1],orientation='h',name='value1')])
-  fig.update_layout(title="TFIDF N-gram Ranking",height=680,margin=dict(l=160,r=0,b=15,t=40,pad=0),font=dict(color="black"))
-
+  fig.update_layout(height=680,margin=dict(l=160,r=0,b=15,t=0,pad=0))
+  #  fig.update_layout(title="<b>Threat Post Term Ranking</b>", font_family="Courier New", height=680,margin=dict(l=160,r=0,b=15,t=40,pad=0))
   return (fig)
 
 
@@ -1145,7 +1189,8 @@ def display_click_data(clickData):
 
     
     df1 = get_cleaned_text_data_original(label)
-    df1.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object ':'datetime'}, inplace=True)
+    df1.rename(columns={'sql_tweet_text': 'text', 'sql_platform': 'platform','sql_sentiment': 'sentiment','sql_datetime_object':'datetime'}, inplace=True)
+
     return df1.to_dict('rows')
 
 

@@ -7,8 +7,8 @@ import creds
 import mysql.connector
 import sshtunnel
 
-sshtunnel.SSH_TIMEOUT = 5.0
-sshtunnel.TUNNEL_TIMEOUT = 5.0
+#sshtunnel.SSH_TIMEOUT = 5.0
+#sshtunnel.TUNNEL_TIMEOUT = 5.0
 stop = ["look","daily","changing","thanks","meet","latest","new","youour","got","tho","im","u","ur",'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd", 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers', 'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', "don't", 'should', "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't", "ain't","can't","can't've","'cause","could've","couldn't've","hadn't've","he'd","he'd've","he'll","he'll've","he's","how'd","how'd'y","how'll","how's","I'd","I'd've","I'll","I'll've","I'm","I've","i'd","i'd've","i'll","i'll've","i'm","i've","it'd","it'd've","it'll","it'll've","let's","ma'am","mayn't","might've","mightn't've","must've","mustn't've","needn't've","o'clock","oughtn't","oughtn't've","sha'n't","shan't've","she'd","she'd've","she'll","she'll've","shouldn't've","so've","so's","that'd","that'd've","that's","there'd","there'd've","there's","they'd","they'd've","they'll","they'll've","they're","they've","to've","we'd","we'd've","we'll","we'll've","we're","we've","what'll","what'll've","what're","what's","what've","when's","when've","where'd","where's","where've","who'll","who'll've","who's","who've","why's","why've","will've","won't've","would've","wouldn't've","y'all","y'all'd","y'all'd've","y'all're","y'all've","you'd've","you'll've"]
 lemmatizer = WordNetLemmatizer()
 
@@ -19,20 +19,6 @@ static_df["sql_tweet_text"] = static_df["sql_tweet_text"].replace('[^a-zA-Z0-9 ]
 static_df["sql_tweet_text"] = static_df['sql_tweet_text'].apply(lambda x: [item.lower() for item in str(x).split() if item.isalpha() == True and item not in stop])
 static_df["sql_tweet_text"] = static_df["sql_tweet_text"].str.join(" ")
 
-
-
-#def get_dataframe():
-
-#	#with sshtunnel.SSHTunnelForwarder(('ssh.pythonanywhere.com'),ssh_username='dmnte', ssh_password='1{B)j#_A<0w/',remote_bind_address=('dmnte.mysql.pythonanywhere-services.com', 3306)) as tunnel:
-#	connection = mysql.connector.connect(user='newuser', password='password',host='127.0.0.1', port=3306,database='dmnte$security_tweet_data',)    	
-			
-#	df = pd.read_sql('SELECT * FROM security_tweet_data', con=connection)
-
-#	connection.close()
-	
-#	return (df)
-
-
 def make_ngram_list(item):
     unigrams = set(item)
     token = nltk.word_tokenize(" ".join(item))
@@ -41,31 +27,6 @@ def make_ngram_list(item):
     bigrams = set(bigrams)
     unigrams_and_bigrams = list(unigrams) + list(bigrams)
     return (unigrams_and_bigrams)
-
-#def get_cleaned_text_data():
-
-	#with sshtunnel.SSHTunnelForwarder(('ssh.pythonanywhere.com'),ssh_username='dmnte', ssh_password='1{B)j#_A<0w/',remote_bind_address=('dmnte.mysql.pythonanywhere-services.com', 3306)) as tunnel:
-	#connection = mysql.connector.connect(user='newuser', password='password',host='127.0.0.1', port=3306,database='dmnte$security_tweet_data',)    	
-			
-	#df = pd.read_sql('SELECT * FROM security_tweet_data', con=connection)
-	#df = static_df
-	##########################preprocessing#######################################################################################################
-	#df['sql_tweet_text'] = df['sql_tweet_text'].replace(r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''','',regex=True)
-	#df['sql_tweet_text'] = df['sql_tweet_text'].replace(r'\B@\w+', '', regex=True)
-	#df["sql_tweet_text"] = df['sql_tweet_text'].apply(lambda x: [CONTRACTION_MAP[item.lower()] if item.lower() in CONTRACTION_MAP.keys() else item for item in str(x).split()])
-	#df["sql_tweet_text"] = df["sql_tweet_text"].replace('[^a-zA-Z0-9 ]', '', regex=True)
-
-	#df["sql_tweet_text"] = df['sql_tweet_text'].apply(lambda x: [item.lower() for item in str(x).split() if any(item.isdigit()) == False and item not in stop])
-	#df["sql_tweet_text"] = df['sql_tweet_text'].apply(lambda x: [item[:-2] if item[-2:] == "'s" or item[-2:] == "’s" else item for item in x])
-	#df["sql_tweet_text"] = df["sql_tweet_text"].str.join(" ")
-	#df["sql_tweet_text"] = df["sql_tweet_text"].str.join(" ")
-	#df["sql_tweet_text"] = df['sql_tweet_text'].apply(lambda x: " ".join([lemmatizer.lemmatize(item.lower()) for item in str(x).split() if len(item) <= 10 and len(item) > 2 and item not in stop]))
-	##############################################################################################################################################
-	
-
-	#connection.close()
-#	return (df)
-
 
 def get_word_list(df):
 	return (' '.join([(item) for item in df['sql_tweet_text']]).split())
@@ -130,26 +91,11 @@ def get_mostfrequent_data_all_daterange(ngram,start_date,end_date):
 
 def get_cleaned_text_data_original(word):
 	df_tweet_graph = pd.DataFrame()
-	#df_tweet_graph = static_df
-	###########################preprocessing#######################################################################################################
-	#df['ptext'] = df['sql_tweet_text'].replace(r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''','',regex=True)
-	#df['ptext'] = df['sql_tweet_text'].replace(r'\B@\w+', '', regex=True)
-	#df["ptext"] = df['sql_tweet_text'].apply(lambda x: [CONTRACTION_MAP[item.lower()] if item.lower() in CONTRACTION_MAP.keys() else item for item in str(x).split()])
-	#df["ptext"] = df['sql_tweet_text'].apply(lambda x: [item[:-2] if item[-2:] == "'s" or item[-2:] == "’s" else item for item in x])
-	#df["ptext"] = df["sql_tweet_text"].str.join(" ")
-	#df["ptext"] = df["sql_tweet_text"].replace('[^a-zA-Z0-9 ]', '', regex=True)
-	#df["ptext"] = df['sql_tweet_text'].apply(lambda x: [item.lower() for item in str(x).split() if item.isdigit() == False and item not in stop])
-	#df["ptext"] = df["sql_tweet_text"].str.join(" ")
-	#df["ptext"] = df['sql_tweet_text'].apply(lambda x: " ".join([lemmatizer.lemmatize(item.lower()) for item in str(x).split() if len(item) <= 10 and len(item) > 2 and item not in stop]))
-	##############################################################################################################################################
-	#connection.close()
-	
 	df_tweet_graph = static_df[static_df['sql_tweet_text'].str.contains(word)]
 
 	return (df_tweet_graph)
 
 def get_novice_view_data():
-
 	df_n = pd.DataFrame()
 	
 	df_n['sql_tweet_text'] = static_df['sql_tweet_text'].str.lower() #change column to lower case to normalize words
