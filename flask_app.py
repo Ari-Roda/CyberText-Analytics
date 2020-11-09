@@ -4,6 +4,7 @@ print (sys.version)
 import dash
 import dash_core_components as dcc
 import dash_html_components as html#
+import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 from data_retrieval_connect_pythonanywhere_ssh import get_mostfrequent_data_all, get_mostfrequent_data_all_daterange, get_cleaned_text_data_original, get_novice_view_data, static_df #get_dataframe, 
@@ -12,10 +13,12 @@ import dash_table
 import plotly.graph_objs as go
 import datetime
 from contractions import world_abbreviations
+from dash.dependencies import Input, Output, State
+
 
 server = Flask(__name__)
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'dbc.themes.BOOTSTRAP']
 app = dash.Dash(__name__, server=server, routes_pathname_prefix='/',
                 external_stylesheets=external_stylesheets)
 
@@ -77,7 +80,9 @@ novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['phishing'], na
 novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['scam'], name='scam'))
 novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['password'], name='password'))
 novice_graph.add_trace(go.Scatter(x=novice_df.index, y=novice_df['botnet'], name='botnet'))
-novice_graph.update_layout(title_text='<b>Daily Threat Term Presence</b>',font_size=13,font_family="Courier New", xaxis=dict(tickmode='linear'))
+novice_graph.update_layout(height=300,margin=dict(l=0,r=0,b=50,t=0,pad=0))
+#novice_graph.update_layout(title_text='<b>Daily Threat Term Presence</b>',font_size=13,font_family="Courier New", xaxis=dict(tickmode='linear'))
+
 
 
 #dcc.Graph(id='apt-map',figure = go.Figure(go.Choropleth(locations=abrevs)),config={'displayModeBar': False})
@@ -108,6 +113,8 @@ app.layout = html.Div([
   html.H1("CyberText Analytics",style={'textAlign': 'left',"background": "silver","color": "blue"}),
 
 
+
+
 ########################################################################################################################################################################
 ################### CTA TAB ##########################################################################################################################################
 #########################################################################################################################################################################
@@ -116,14 +123,26 @@ app.layout = html.Div([
   dcc.Tabs([
     dcc.Tab(label='Threat Text Tracking', style=tab_style, selected_style=tab_selected_style, children=[
     html.Div([
-
-
-      
+  
       html.Div([
-      
-      html.Div(dcc.Graph(id='graph-output-simple', figure=novice_graph, config={'displayModeBar': False}), className="thirteen columns"),], className="row"),
+
+        html.Div(dcc.Markdown(""), className="two columns"),
 
         html.Div([
+                dcc.Markdown("**Daily Threat Term Presence**", style={'marginLeft': 0, 'marginRight': 0, 'marginTop': 10, 'marginBottom': 0,'display': 'inline-block', 'margin-right': '5px',"font-family":"Courier New",'font-size':'18px'}), 
+                html.Abbr("\u2370", title="Hello, I am hover-enabled helpful information.")
+                ],className="five columns"),
+
+        ], className="row"),
+
+
+      html.Div([html.Div(dcc.Graph(id='graph-output-simple', figure=novice_graph, config={'displayModeBar': False}), className="thirteen columns"),], className="row"),
+
+      
+
+
+        html.Div([
+      html.Div(dcc.Markdown(""), className="two columns"),
       html.Div(dcc.Dropdown(id='dropdown',
                             value='ALL',
                             multi=False,
@@ -136,10 +155,10 @@ app.layout = html.Div([
                                     ],
                             style={
                                    'margin': 7,
-                                   'marginLeft':76,
+                                   'marginLeft':0,
                                    'width': '150px',
                                   }
-                            ), className="two columns"),
+                            ), className="one columns"),
       html.Div(dcc.DatePickerRange(
                        id='date-input',
                        #min_date_allowed=df['sql_datetime_object'].min(),
@@ -151,7 +170,7 @@ app.layout = html.Div([
                        display_format='YYYY-MM-DD',
                        style={
                                'margin' : 7,
-                               'margin-left' : '45px',
+                               'margin-left' : '20px',
                        }
               ), className="three columns"),
               ], className="row"),
@@ -159,10 +178,27 @@ app.layout = html.Div([
 
 
       html.Div([
-        html.Div(dcc.Markdown("**Threat Term Ranking**"), style={'marginLeft': 158, 'marginRight': 0, 'marginTop': 0, 'marginBottom': 25,
-               'padding': '0px 0px 0px 0px',"font-family":"Courier New",'font-size':'18px'}, className="five columns"),
-        html.Div(dcc.Markdown("**Threat Tweet Data Viewer**"), style={'marginLeft': 50, 'marginRight': 0, 'marginTop': 0, 'marginBottom': 25,
-               'padding': '0px 0px 0px 0px',"font-family":"Courier New",'font-size':'18px'}, className="six columns"),
+
+        html.Div(dcc.Markdown(" "), className="two columns"),
+
+        #html.Div(dcc.Markdown("**Threat Term Ranking**"), style={'marginLeft': 0, 'marginRight': 0, 'marginTop': 0, 'marginBottom': 25,
+        #       'padding': '0px 0px 0px 0px',"font-family":"Courier New",'font-size':'18px'}, className="six columns"),
+
+        html.Div([
+                dcc.Markdown("**Threat Term Ranking**", style={'marginLeft': 0, 'marginRight': 0, 'marginTop': 0, 'marginBottom': 5,'display': 'inline-block', 'margin-right': '5px',"font-family":"Courier New",'font-size':'18px'}), 
+                html.Abbr("\u2370", title="Hello, I am hover-enabled helpful information.")
+                ],className="five columns"),
+        
+        #dbc.Tooltip("This graph shows the ranking of terms from our collected data based on TFIDF (Term Frequency Inverse Document Frequency) score. This can be filtered by date and n-gram size.",target="TTR",placement='bottom-start'),
+
+
+        html.Div([
+                dcc.Markdown("**Threat Tweet Data Viewer**", style={'marginLeft': 0, 'marginRight': 0, 'marginTop': 0, 'marginBottom': 5,'display': 'inline-block', 'margin-right': '5px',"font-family":"Courier New",'font-size':'18px'}), 
+                html.Abbr("\u2370", title="Hello, I am hover-enabled helpful information.")
+                ],className="three columns"),
+
+        #dbc.Tooltip("This table shows details of the tweets contained within the dataset. The tweets within the table are filtered",target="TTDV",placement='bottom-start',),
+
               ], className="row"),
 
 
